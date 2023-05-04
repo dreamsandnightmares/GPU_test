@@ -41,17 +41,17 @@ def main():
 
 
     pareto_in, pareto_fitness = mopso_.done(cycle_)  # 经过cycle_轮迭代后，pareto边界粒子
-    with open("pareto_in_ht.txt", "w") as f:
+    with open("pareto_in_bt.txt", "w") as f:
         pass
-    file_path = os.path.abspath("pareto_in_ht.txt")
+    file_path = os.path.abspath("pareto_in_bt.txt")
 
-    with open("pareto_fitness_ht.txt", "w") as f:
+    with open("pareto_fitness_bt.txt", "w") as f:
         pass
-    file_path_fitness = os.path.abspath("pareto_fitness_ht.txt")
+    file_path_fitness = os.path.abspath("pareto_fitness_bt.txt")
 
     para = {'pv_cost:': cost_pv,  'Boundary:': Boundary,
             'el_eff': 0.75, 'fc_eff': 0.6}
-    with open("pareto_fitness_para.txt", "w") as f:
+    with open("pareto_fitness_para_bt.txt", "w") as f:
         for key, value in para.items():
             f.write('%s:%s\n' % (key, value))
     np.savetxt(file_path, pareto_in)  # 保存pareto边界粒子的坐标
@@ -61,7 +61,7 @@ def main():
     print ("\n,迭代结束,over")
 
     para = {'pv_cost:': cost_pv, 'bt_cost:': cost_bt, 'Boundary:': Boundary}
-    with open("pareto_fitness_para.txt", "w") as f:
+    with open("pareto_fitness_para_bt.txt", "w") as f:
         for key,value in para.items():
             f.write('%s:%s\n' % (key, value))
 
