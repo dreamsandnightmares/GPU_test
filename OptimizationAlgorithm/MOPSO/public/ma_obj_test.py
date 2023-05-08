@@ -7,7 +7,7 @@ from data_te import  data_load1
 from PVModel import  PVSystem
 
 from ma_hydrogenStorage  import HT
-from gridPrice import grid_price
+from gridPrice import grid_price1 as grid_price
 from MABattey import LionBattery
 from maBEMS import BEMS
 from maHEMS import HEMS
@@ -199,6 +199,9 @@ def lcoe(cost_pv, cost_bt, li_cap, pv_cap, project_time, energy,ele_cost):
         down += (energy / (math.pow((1 + d), i)))
 
     lcoe_ = (cost_cap + cost_om_all + cost_rep+ele_cost) / down
+    print((cost_cap + cost_om_all + cost_rep+ele_cost),'cost_all')
+    print(down,'down')
+    print(ele_cost,'ele_cost')
     return lcoe_
 
 def lcoe_HT(cost_pv, cost_EL,cost_fc,cost_ht,el_power,fc_power,ht_cap,pv_cap, project_time, energy,ele_cost):
@@ -209,12 +212,13 @@ def lcoe_HT(cost_pv, cost_EL,cost_fc,cost_ht,el_power,fc_power,ht_cap,pv_cap, pr
 
 
 
-    cost_om = (cost_cap_ht+cost_cap_fc+cost_cap_el)*0.01 + 0.01*cost_cap_pv
+    cost_om = (cost_cap_ht+cost_cap_fc+cost_cap_el)*0.025 + 0.01*cost_cap_pv
     d = 0.05
     down = 0
     cost_om_all = 0
 
     cost_cap =cost_cap_ht+cost_cap_fc+cost_cap_el + cost_cap_pv
+    print(cost_cap,'cap_cost')
     cost_rep = 0
 
     for i in range(project_time):
@@ -235,6 +239,9 @@ def lcoe_HT(cost_pv, cost_EL,cost_fc,cost_ht,el_power,fc_power,ht_cap,pv_cap, pr
 
 
     lcoe_ = (cost_cap + cost_om_all + cost_rep+ele_cost) / down
+    print((cost_cap + cost_om_all + cost_rep+ele_cost),'cost_all')
+    print(down,'down')
+    print(ele_cost,'ele_cost')
     return lcoe_
 def lcoe_hy(cost_pv, cost_bt,cost_EL,cost_fc,cost_ht,el_power,fc_power,ht_cap,bt_cap,pv_cap, project_time, energy,ele_cost):
     cost_cap_el = cost_EL *el_power
@@ -271,6 +278,7 @@ def lcoe_hy(cost_pv, cost_bt,cost_EL,cost_fc,cost_ht,el_power,fc_power,ht_cap,bt
 
 
     lcoe_ = (cost_cap + cost_om_all + cost_rep+ele_cost) / down
+    print((cost_cap + cost_om_all + cost_rep+ele_cost),'cost_all')
     return lcoe_
 
 def energy_management(project_lifetime:int,life_time:int,bt:np.array,pv_output:np.array,pd_load):

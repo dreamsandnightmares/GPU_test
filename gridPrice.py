@@ -2,6 +2,7 @@ from data_te import data_load1
 from PVModel import PVSystem
 import sys
 import os
+import pandas as pd
 curr_path = os.path.dirname(os.path.abspath(__file__))  # 当前文件所在绝对路径
 parent_path = os.path.dirname(curr_path)  # 父路径
 sys.path.append(parent_path)  # 添加路径到系统路径
@@ -17,9 +18,17 @@ def grid_price(time):
     return price
 
 def grid_price1(time):
-    pd_load, pd_price, pd_wea_wind, pd_wea_G_dir, pd_wea_G_diff, pd_wea_T, pd_wea_G_hor = data_load1()
+    path = r'/home/WCH/Code/M_con_load/GPU_test/RECO_data/price.csv'
+    price  =pd.read_csv(path)
+    price = price['price'].tolist()
 
-    return pd_price[time]
+
+    # price = {'price': pd_price}
+    # data_price = pd.DataFrame(price)
+    # data_price.to_csv('RECO_data/price.csv')
+
+
+    return price[time]
 
 
 

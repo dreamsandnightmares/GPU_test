@@ -20,7 +20,7 @@ import os
 def main():
 
     particals = 30 #粒子群的数量
-    cycle_ = 300 #迭代次数
+    cycle_ = 150 #迭代次数
     mesh_div = 10 #网格等分数量
     thresh = 300#外部存档阀值
     project_lifetime = 25
@@ -29,7 +29,7 @@ def main():
     cost_bt =1625
     cost_el = 1600
     cost_fc =4000
-    cost_ht = 30
+    cost_ht = 100
 
 
 
@@ -39,7 +39,7 @@ def main():
     M = 2
     # Population, Boundary, Coding = P_objective.P_objective("init", Problem, M, particals)
     # # print(Boundary)
-    Boundary = np.array([[3000., 6000, 6000., 6000, 13000], [100., 100, 100., 300, 100]])
+    Boundary = np.array([[2500., 2000, 2000., 100, 7000], [700., 300, 200., 200, 1000]])
     print(type(Boundary))
     ''
     # Boundary =

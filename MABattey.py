@@ -8,7 +8,7 @@ import numpy as np
 
 from  hydrogenStorage import HT
 
-from  gridPrice import  grid_price
+from  gridPrice import  grid_price1 as grid_price
 
 import sys
 import os

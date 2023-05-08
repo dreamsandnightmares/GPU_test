@@ -3,7 +3,7 @@ from ma_hydrogenStorage  import HT
 from PVModel import PVSystem
 import matplotlib.pyplot as plt
 import math
-from gridPrice import  grid_price
+from gridPrice import  grid_price1 as grid_price
 from data_te import data_load1
 import numpy as np
 import sys

@@ -45,14 +45,6 @@ class Mopso_res:
                                                cost_ht=self.cost_ht,
                                          project_lifetime=self.project_lifetime,life_time=self.life_time)
         print(self.fitness_,'fitness')
-    def evaluation_fitness_olds(self):
-        '只输出 函数值'
-        # self.fitness_ = P_objective.P_objective("value", "DTLZ2", 2, self.in_)
-        print(self.in_,'in')
-        self.fitness_ = ma_obj_test.fitness(self.in_,cost_pv=self.cost_pv,cost_bt=self.cost_bt,
-                                         project_lifetime=self.project_lifetime,life_time=self.life_time)
-        print(self.fitness_,'fitness')
-
 
 
     def initialize(self):
