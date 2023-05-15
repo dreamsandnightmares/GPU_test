@@ -5,6 +5,7 @@ import numpy as np
 
 from data_te import  data_load1
 from PVModel import  PVSystem
+import pandas as pd
 
 from ma_hydrogenStorage  import HT
 from gridPrice import  grid_price
@@ -285,6 +286,9 @@ def lcoe_hy(cost_pv, cost_bt,cost_EL,cost_fc,cost_ht,el_power,fc_power,ht_cap,bt
 
 def energy_management(project_lifetime:int,life_time:int,bt:np.array,pv_output:np.array,pd_load):
     res_output = pv_output
+    price_path = r'/home/WCH/Code/5.15_3/GPU_test/RECO_data/price.csv'
+    price = pd.read_csv(price_path)
+    price = price['price'].tolist()
 
     ems  = BEMS(bt=bt)
     ems.initializa()
@@ -314,7 +318,7 @@ def energy_management(project_lifetime:int,life_time:int,bt:np.array,pv_output:n
             stoTopower += sto
             energyTosto += eTs
             energy_BESS.append(ele)
-            ele_cost += ele * grid_price(i)
+            ele_cost += ele * price[i]
             ele_all += pd_load[i]
             energy_sto.append(eTs)
             energy_sto_dis.append(sto)
@@ -322,6 +326,9 @@ def energy_management(project_lifetime:int,life_time:int,bt:np.array,pv_output:n
 
 def energy_management_ht(project_lifetime:int,life_time:int,ht:HT,el:np.array,fc:np.array,pv_output:np.array,pd_load):
     res_output = pv_output
+    price_path = r'/home/WCH/Code/5.15_3/GPU_test/RECO_data/price.csv'
+    price = pd.read_csv(price_path)
+    price = price['price'].tolist()
 
 
     ems  = HEMS(ht=ht,el_power=el,fc_power=fc)
@@ -351,7 +358,7 @@ def energy_management_ht(project_lifetime:int,life_time:int,ht:HT,el:np.array,fc
             stoTopower += sto
             energyTosto += eTs
             energy_BESS.append(ele)
-            ele_cost += ele * grid_price(i)
+            ele_cost += ele * price[i]
             ele_all += pd_load[i]
             energy_sto.append(eTs)
             energy_sto_dis.append(sto)
@@ -360,6 +367,9 @@ def energy_management_ht(project_lifetime:int,life_time:int,ht:HT,el:np.array,fc
 
 def energy_management_hybid(project_lifetime:int,life_time:int,bt:LionBattery,ht:HT,el:np.array,fc:np.array,pv_output:np.array,pd_load):
     res_output = pv_output
+    price_path  =r'/home/WCH/Code/5.15_3/GPU_test/RECO_data/price.csv'
+    price = pd.read_csv(price_path)
+    price = price['price'].tolist()
 
 
     ems  =HybridESS (bt=bt,ht=ht,el_power=el,fc_power=fc)
@@ -392,7 +402,7 @@ def energy_management_hybid(project_lifetime:int,life_time:int,bt:LionBattery,ht
             stoTopower += sto
             energyTosto += eTs
             energy_BESS.append(ele)
-            ele_cost += ele * grid_price(i)
+            ele_cost += ele * price[i]
             ele_all += pd_load[i]
             energy_sto.append(eTs)
             energy_sto_dis.append(sto)
