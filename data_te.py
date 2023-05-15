@@ -26,11 +26,11 @@ def data_load1():
     x = pd.DataFrame()
     for name in  FileNames:
 
-        if re.search('RECO_Load', name):
+        if re.search('load_data.csv', name):
             full_name = os.path.join(path, name)
             pd_load = pd.read_csv(full_name, encoding='utf-8')
 
-            pd_load_list = pd_load['mw'].tolist()
+            pd_load_list = pd_load['2.169525401442797943e+02'].tolist()
 
 
 
