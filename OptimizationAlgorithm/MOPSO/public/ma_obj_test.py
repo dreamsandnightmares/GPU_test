@@ -7,11 +7,12 @@ from data_te import  data_load1
 from PVModel import  PVSystem
 
 from ma_hydrogenStorage  import HT
-from gridPrice import grid_price1 as grid_price
+from gridPrice import  grid_price
 from MABattey import LionBattery
 from maBEMS import BEMS
 from maHEMS import HEMS
 from maHybridESS import HybridESS
+from converter import *
 
 
 import matplotlib.pyplot as plt
@@ -71,6 +72,7 @@ def device_init_ht(in_:np.array):
     return pv,el_power,fc_power,ht,pd_load,pd_price,pv_output,R_init
 def device_init_hybrid(in_:np.array):
     pd_load, pd_price, pd_wea_wind, pd_wea_G_dir, pd_wea_G_diff, pd_wea_T, pd_wea_G_hor = data_load1()
+
 
     pv_cap  = in_[:,0]
     print(pv_cap,'PV_CAP')
@@ -284,7 +286,6 @@ def lcoe_hy(cost_pv, cost_bt,cost_EL,cost_fc,cost_ht,el_power,fc_power,ht_cap,bt
 def energy_management(project_lifetime:int,life_time:int,bt:np.array,pv_output:np.array,pd_load):
     res_output = pv_output
 
-
     ems  = BEMS(bt=bt)
     ems.initializa()
     ele_cost = 0
@@ -293,9 +294,9 @@ def energy_management(project_lifetime:int,life_time:int,bt:np.array,pv_output:n
     stoTopower = 0
     energyTosto = 0
     energy_BESS = []
-    energy_BESS_OLDS = []
+
     soc_BESS = []
-    soc_BESS_OLDS = []
+
     ele_all = 0
     energy_sto = []
     energy_sto_dis = []
@@ -303,7 +304,7 @@ def energy_management(project_lifetime:int,life_time:int,bt:np.array,pv_output:n
         for i in range(life_time):
 
 
-            energy = res_output[i] - pd_load[i]
+            energy = DC_DC_converter(res_output[i]) - reverse_DC_AC_converter(pd_load[i])
             # print(energy,'energy')
             # print(energy.shape)
             soc_.append(bt.readSoc())
@@ -451,6 +452,8 @@ def fitness_bt(in_,cost_bt,cost_pv,project_lifetime,life_time):
                                                                                 pd_load=pd_load,
                                                                                 )
 
+
+
     Lcoe = lcoe(cost_pv=cost_pv,
                    pv_cap=in_[:,0], project_time=project_lifetime,
                 energy=(ele_all), ele_cost=ele_cost,cost_bt=cost_bt,li_cap=in_[:,1])
@@ -477,13 +480,22 @@ if __name__ == '__main__':
     print(time.time())
 
 
-    in_ =np.array([[1145,4096],[1832,3921]])
+    in_ =np.array([[1406,3195],[1832,3921]])
     project_lifetime = 25
     life_time = 8760
-    cost_pv = 5000
-    cost_bt = 1900
-    # obj =fitness(in_=in_,project_lifetime=project_lifetime,life_time=life_time,cost_bt=cost_bt,cost_pv=cost_pv)
+    cost_pv = 4040
+    cost_bt = 1625
+    obj =fitness_bt(in_=in_,project_lifetime=project_lifetime,life_time=life_time,cost_bt=cost_bt,cost_pv=cost_pv)
 
+    in_ = np.array([[1406, 900,900,6000], [1406, 900,900,6000]])
+    cost_el =1600
+    cost_fc = 4000
+    cost_ht = 100
+    obj_2 = fitness_ht(in_=in_, project_lifetime=project_lifetime, life_time=life_time, cost_el=cost_bt,cost_fc= cost_fc,cost_pv=cost_pv,cost_ht=cost_ht)
+
+    in_ = np.array([[1185, 956, 373, 200,2846], [1406, 900, 900, 200,6000]])
+    obj_3 = fitness_hy(in_=in_, project_lifetime=project_lifetime, life_time=life_time, cost_el=cost_bt,
+                       cost_fc=cost_fc, cost_pv=cost_pv, cost_ht=cost_ht,cost_bt=cost_bt)
 
     # pv, bt, pd_load, pd_price, pv_output, R_init = device_init(in_)
     # gridTopower, stoTopower, energyTosto, ele_cost, ele_all = energy_management(project_lifetime=project_lifetime,life_time=life_time,bt=bt,

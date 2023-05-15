@@ -8,9 +8,10 @@ from  PVModel import PVSystem
 import numpy as np
 
 from  hydrogenStorage import HT
-from  gridPrice import grid_price1 as grid_price
+from  gridPrice import  grid_price
 from  data_te import data_load1
 from  HEMS import HEMS
+from converter import *
 
 from  HybridESS import HybridESS
 
@@ -65,8 +66,8 @@ class BEMS(object):
 
                 '充电过程'
                 max_charge = self.bt.max_charge()[i]
-                if energy[i] <= max_charge:
-                    P_BT_ch[i] = energy[i]
+                if energy[i] <= reverse_DC_DC_converter(max_charge):
+                    P_BT_ch[i] =DC_DC_converter(energy[i])
                     self.bt.StateOfCharge1(P_BT_ch=P_BT_ch, P_BT_dc=P_BT_dc)
                     self.bt.soc(i)
 
@@ -79,7 +80,7 @@ class BEMS(object):
                     self.bt.soc(i)
                     self.GridToEnergy[i] = 0
                     self.storageToEnergy[i] = 0
-                    self.energyToStorage [i]=max_charge
+                    self.energyToStorage [i]=reverse_DC_DC_converter(max_charge)
            elif energy[i] < 0:
                 P_BT_dc = np.zeros([self.bt.len_])
                 P_BT_ch = np.zeros([self.bt.len_])
@@ -92,9 +93,9 @@ class BEMS(object):
                     # print(type(max_discharge))
                     # print(max_discharge[i,:])
 
-                    if abs(energy[i]) <= max_discharge:
+                    if abs(energy[i]) <= DC_DC_converter(max_discharge):
 
-                        P_BT_dc[i] = abs(energy[i])
+                        P_BT_dc[i] = abs(reverse_DC_DC_converter(energy[i]))
                         self.bt.StateOfCharge1(P_BT_ch=P_BT_ch, P_BT_dc=P_BT_dc)
                         self.bt.soc(i)
                         self.GridToEnergy[i] = 0
@@ -104,15 +105,15 @@ class BEMS(object):
                         P_BT_dc[i] = max_discharge
                         self.bt.StateOfCharge1(P_BT_ch=P_BT_ch, P_BT_dc=P_BT_dc)
                         self.bt.soc(i)
-                        self.GridToEnergy[i] =abs(energy[i]) - max_discharge
-                        self.storageToEnergy[i] =  max_discharge
+                        self.GridToEnergy[i] =DC_AC_converter(abs(energy[i]) - DC_DC_converter(max_discharge))
+                        self.storageToEnergy[i] =  DC_DC_converter(max_discharge)
                         self.energyToStorage[i] =  0
                 else:
                     P_BT_dc = np.zeros([self.bt.len_])
                     P_BT_ch = np.zeros([self.bt.len_])
                     self.bt.StateOfCharge1(P_BT_ch=P_BT_ch, P_BT_dc=P_BT_dc)
                     self.bt.soc(i)
-                    self.GridToEnergy[i] =  abs(energy[i])
+                    self.GridToEnergy[i] =  DC_AC_converter(abs(energy[i]))
                     self.energyToStorage[i] = 0
                     self.storageToEnergy[i] = 0
 
@@ -140,4 +141,4 @@ def device_init(in_:np.array):
 
 
 
-    return pv,bt,pd_load,pd_price,pv_output,R_init
+    return pv,bt,pd_load,pd_price,pv_output,R_init*25

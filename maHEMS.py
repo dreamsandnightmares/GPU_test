@@ -1,12 +1,13 @@
 from PVModel import PVSystem
 from ma_hydrogenStorage import HT
-from gridPrice import  grid_price1 as grid_price
+from gridPrice import   grid_price
 from data_te import data_load1
 import matplotlib.pyplot as plt
 import math
 import numpy as np
 import sys
 import os
+from  converter import *
 curr_path = os.path.dirname(os.path.abspath(__file__))  # 当前文件所在绝对路径
 parent_path = os.path.dirname(curr_path)  # 父路径
 sys.path.append(parent_path)  # 添加路径到系统路径
@@ -40,8 +41,8 @@ class HEMS(object):
 
                 '充电过程'
                 max_charge = min(self.ht.max_charge()[i],self.el_power[i])
-                if energy[i] <= max_charge:
-                    P_el[i] = energy[i]
+                if energy[i] <= reverse_DC_DC_converter(max_charge):
+                    P_el[i] = DC_DC_converter(energy[i])
                     self.ht.SOC(P_el=P_el,P_fc=P_fc)
 
 
@@ -62,13 +63,13 @@ class HEMS(object):
                 # print(SOC,'SOC')
                 # print(self.bt.SOC_min)
                 if SOC > self.ht.SOC_Min()[i]:
-                    max_discharge = min(self.ht.max_discharge()[i],self.fc_power[i])
+                    max_discharge = min(self.ht.max_discharge()[i],self.fc_power[i]*0.6)
                     # print(type(max_discharge))
                     # print(max_discharge[i,:])
 
-                    if abs(energy[i]) <= max_discharge:
+                    if abs(energy[i]) <= DC_DC_converter(max_discharge):
 
-                        P_fc[i] = abs(energy[i])
+                        P_fc[i] = abs(reverse_DC_DC_converter(energy[i]))
                         self.ht.SOC(P_el=P_el,P_fc=P_fc)
                         self.GridToEnergy[i] = 0
                         self.storageToEnergy[i] = abs(energy[i])
@@ -77,14 +78,14 @@ class HEMS(object):
                         P_fc[i] = max_discharge
                         self.ht.SOC(P_el=P_el,P_fc=P_fc)
 
-                        self.GridToEnergy[i] =abs(energy[i]) - max_discharge
+                        self.GridToEnergy[i] =DC_AC_converter(abs(energy[i]) - DC_DC_converter(max_discharge))
                         self.storageToEnergy[i] =  max_discharge
                         self.energyToStorage[i] =  0
                 else:
                     P_fc = np.zeros([self.ht.len_])
                     P_el = np.zeros([self.ht.len_])
                     self.ht.SOC(P_el=P_el,P_fc=P_fc)
-                    self.GridToEnergy[i] =  abs(energy[i])
+                    self.GridToEnergy[i] =  DC_AC_converter(abs(energy[i]))
                     self.energyToStorage[i] = 0
                     self.storageToEnergy[i] = 0
 

@@ -4,7 +4,7 @@ from hydrogenStorage import HT
 from PVModel import PVSystem
 import matplotlib.pyplot as plt
 import math
-from gridPrice import grid_price1 as grid_price
+from gridPrice import  grid_price
 from data_te import data_load1
 import sys
 import os
@@ -75,7 +75,7 @@ class HybridESS(object):
                     stoToenergy=max_discharge
                     SOC = self.ht.readSOC()
                     if SOC > self.ht.SOC_Min():
-                        max_discharge = min(self.ht.max_discharge(), self.fc)
+                        max_discharge = min(self.ht.max_discharge(), self.fc*0.6)
                         if abs(energy) <= max_discharge:
                             self.ht.soc(P_el=0, P_fc=abs(energy))
                             self.GridToEnergy = 0
@@ -95,7 +95,7 @@ class HybridESS(object):
             else:
                     SOC = self.ht.readSOC()
                     if SOC > self.ht.SOC_Min():
-                        max_discharge = min(self.ht.max_discharge(), self.fc)
+                        max_discharge = min(self.ht.max_discharge(), self.fc*0.6)
                         if abs(energy) <= max_discharge:
                             self.ht.soc(P_el=0, P_fc=abs(energy))
                             self.GridToEnergy = 0

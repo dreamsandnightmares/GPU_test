@@ -17,7 +17,7 @@ class HT(object):
         # 设置LOH max 与min 没有查到相关数据
 
         self.Cap_H2 = Cap_H2
-        self.eta_FC = eta_FC
+
 
         self.eta_EL = eta_EL
         self.delta_t = 1
@@ -28,8 +28,9 @@ class HT(object):
         self.loh_delta = np.zeros(self.len_)
         self.loh_dc = np.zeros(self.len_)
 
+        self.eta_FC = np.array([eta_FC]*self.len_)
     def initializa(self):
-        self.LOH_t = np.array([0.2]*self.len_)
+        self.LOH_t = np.array([0.4]*self.len_)
 
     def SOC(self, P_el, P_fc):
 
@@ -56,3 +57,12 @@ class HT(object):
 
     def SOC_Min(self):
         return self.LOH_t_min
+
+if __name__ == '__main__':
+
+    ht =HT(Cap_H2=[4000])
+    ht.initializa()
+    ht.LOH_t =[1]
+
+
+    print(ht.max_discharge())

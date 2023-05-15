@@ -36,7 +36,7 @@ load_data = generate_load_data(num_hours=8760, min_load=150, max_load=250, max_v
 
 
 print(load_data)
-np.savetxt("load_data.csv", load_data, delimiter=",")
+# np.savetxt("load_data.csv", load_data, delimiter=",")
 dist =list(range(len(load_data)))
 plt.plot(dist,load_data)
 plt.show()

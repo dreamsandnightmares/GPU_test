@@ -18,7 +18,7 @@ def grid_price(time):
     return price
 
 def grid_price1(time):
-    path = r'/home/WCH/Code/M_con_load/GPU_test/RECO_data/price.csv'
+    path = r'C:\Users\王晨浩\Desktop\GPU_test\RECO_data\price.csv'
     price  =pd.read_csv(path)
     price = price['price'].tolist()
 

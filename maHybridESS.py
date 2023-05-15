@@ -3,7 +3,8 @@ from ma_hydrogenStorage  import HT
 from PVModel import PVSystem
 import matplotlib.pyplot as plt
 import math
-from gridPrice import  grid_price1 as grid_price
+from gridPrice import   grid_price
+from converter import *
 from data_te import data_load1
 import numpy as np
 import sys
@@ -42,9 +43,9 @@ class HybridESS(object):
 
             if energy[i] >= 0:
                 '充电过程'
-                max_charge = self.bt.max_charge()[i]
+                max_charge = reverse_DC_DC_converter(self.bt.max_charge()[i])
                 if energy[i] <= max_charge:
-                    P_BT_ch[i] = energy[i]
+                    P_BT_ch[i] = DC_DC_converter(energy[i])
                     self.bt.StateOfCharge1(P_BT_ch=P_BT_ch, P_BT_dc=P_BT_dc)
                     self.bt.soc(i)
 
@@ -61,23 +62,23 @@ class HybridESS(object):
                     self.energyToStorage[i] = max_charge
 
                     energyToStorage = max_charge
-                    energy_ = energy[i] -max_charge
+                    energy_ = energy[i] -reverse_DC_DC_converter(max_charge)
 
-                    max_charge = min(self.ht.max_charge()[i],self.el_power[i])
-                    if energy_ <= max_charge:
-                        P_el[i] = energy[i]
+                    max_charge = (min(self.ht.max_charge()[i],self.el_power[i]))
+                    if DC_DC_converter(energy_) <= max_charge:
+                        P_el[i] = DC_DC_converter(energy_)
                         self.ht.SOC(P_el=P_el,P_fc=P_fc)
 
                         self.GridToEnergy[i] = 0
                         self.storageToEnergy[i] = 0
-                        self.energyToStorage[i] = energy[i]+energyToStorage
+                        self.energyToStorage[i] = energy_+ reverse_DC_DC_converter(energyToStorage)
 
                     else:
                         P_el[i] = max_charge
                         self.ht.SOC(P_el=P_el,P_fc=P_fc)
                         self.GridToEnergy[i] = 0
                         self.storageToEnergy[i] = 0
-                        self.energyToStorage[i] = max_charge+energyToStorage
+                        self.energyToStorage[i] = max_charge+reverse_DC_DC_converter(energyToStorage)
 
             elif energy[i] < 0:
                 P_BT_dc = np.zeros([self.bt.len_])
@@ -88,28 +89,28 @@ class HybridESS(object):
                 '放电过程'
                 SOC = self.bt.readSoc()[i]
                 if SOC > self.bt.SOC_min[i]:
-                    max_discharge = self.bt.max_discharge()[i]
+                    max_discharge = DC_DC_converter(self.bt.max_discharge()[i])
 
                     if abs(energy[i]) <= max_discharge:
-                        P_BT_dc[i] = abs(energy[i])
+                        P_BT_dc[i] = reverse_DC_DC_converter(abs(energy[i]))
                         self.bt.StateOfCharge1(P_BT_ch=P_BT_ch, P_BT_dc=P_BT_dc)
                         self.bt.soc(i)
                         self.GridToEnergy[i] = 0
-                        self.storageToEnergy[i] = abs(energy[i])
+                        self.storageToEnergy[i] = reverse_DC_DC_converter(abs(energy[i]))
                         self.energyToStorage[i] = 0
                     else:
                         P_BT_dc[i] = max_discharge
                         self.bt.StateOfCharge1(P_BT_ch=P_BT_ch, P_BT_dc=P_BT_dc)
                         self.bt.soc(i)
 
-                        energy_ = abs(energy[i]) - max_discharge
+                        energy_ = abs(energy[i]) - DC_DC_converter(max_discharge)
                         stoToenergy=max_discharge
 
                         SOC = self.ht.readSOC()[i]
                         if SOC > self.ht.SOC_Min()[i]:
-                            max_discharge = min(self.ht.max_discharge()[i],self.fc_power[i])
+                            max_discharge = reverse_DC_DC_converter(min(self.ht.max_discharge()[i],self.fc_power[i]*0.6))
                             if energy_ <= max_discharge:
-                                P_fc[i] = energy_
+                                P_fc[i] = reverse_DC_DC_converter(energy_)
                                 self.ht.SOC(P_el=P_el,P_fc=P_fc)
                                 self.GridToEnergy[i] = 0
                                 self.storageToEnergy[i] = energy_ +stoToenergy
@@ -117,13 +118,13 @@ class HybridESS(object):
                             else:
                                 P_fc[i] = max_discharge
                                 self.ht.SOC(P_el=P_el,P_fc=P_fc)
-                                self.GridToEnergy[i] = energy_ - max_discharge
+                                self.GridToEnergy[i] = energy_ - DC_DC_converter(max_discharge)
                                 self.storageToEnergy[i] = max_discharge+stoToenergy
                                 self.energyToStorage[i] = 0
 
                         else:
 
-                            self.GridToEnergy[i] = abs(energy[i]) -stoToenergy
+                            self.GridToEnergy[i] = abs(energy[i]) -DC_DC_converter(stoToenergy)
                             self.energyToStorage[i] = 0
                             self.storageToEnergy[i] = stoToenergy
 
@@ -133,19 +134,19 @@ class HybridESS(object):
                         P_el = np.zeros([self.ht.len_])
                         SOC = self.ht.readSOC()[i]
                         if SOC > self.ht.SOC_Min()[i]:
-                            max_discharge = min(self.ht.max_discharge()[i],self.fc_power[i])
+                            max_discharge = DC_DC_converter(min(self.ht.max_discharge()[i],self.fc_power[i]*0.6))
                             if abs(energy[i]) <= max_discharge:
 
-                                P_fc[i] = abs(energy[i])
+                                P_fc[i] = reverse_DC_DC_converter(abs(energy[i]))
                                 self.ht.SOC(P_el=P_el, P_fc=P_fc)
                                 self.GridToEnergy[i] = 0
-                                self.storageToEnergy[i] = abs(energy[i])
+                                self.storageToEnergy[i] = reverse_DC_DC_converter(abs(energy[i]))
                                 self.energyToStorage[i] = 0
                             else:
                                 P_fc[i] = max_discharge
                                 self.ht.SOC(P_el=P_el, P_fc=P_fc)
 
-                                self.GridToEnergy[i] = abs(energy[i]) - max_discharge
+                                self.GridToEnergy[i] = abs(energy[i]) - DC_DC_converter(max_discharge)
                                 self.storageToEnergy[i] = max_discharge
                                 self.energyToStorage[i] = 0
 

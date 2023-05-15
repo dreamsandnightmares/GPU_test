@@ -45,15 +45,16 @@ if __name__ == '__main__':
         a.append(x.PVpower(i))
 
         c += x.PVpower(i)
-    dist = list(range(len(a)))
-    plt.plot(dist, a, label="PV_power")
-    plt.legend()
-    plt.title("PV_power")
-    plt.xlabel('Hour [h]')
-    print(c,'all')
-    print(max(a))
-    #
+    diff_list =[]
+    for i in range(8760):
+        diff = pd_load[i]  - a[i]
+        diff_list.append(diff)
+    dist = list(range(len(diff_list)))
+    plt.plot(dist,diff_list)
+    print(max(diff_list),'max_load')
     plt.show()
+
+
 
     # # 例如我们要存储两个list：name_list 和 err_list 到 Excel 两列
     # # name_list和err_list均已存在

@@ -8,7 +8,7 @@ import numpy as np
 
 from  hydrogenStorage import HT
 
-from  gridPrice import  grid_price1 as grid_price
+from  gridPrice import   grid_price
 
 import sys
 import os
@@ -41,7 +41,7 @@ class LionBattery(object) :
 
 
     def initializa(self):
-        self.SOC_t =np.array([0.5]*self.len_)
+        self.SOC_t =np.array([0.4]*self.len_)
 
     def StateOfCharge1(self, P_BT_ch, P_BT_dc,):
 

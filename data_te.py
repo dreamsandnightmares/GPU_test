@@ -15,7 +15,7 @@ sys.path.append(parent_path)  # 添加路径到系统路径
 # FileNames =os.listdir(path)
 
 def data_load1():
-    path = r"/home/WCH/Code/M_con_load/GPU_test/RECO_data"
+    path = r"/home/WCH/Code/5.15/GPU_test/RECO_data"
     # path = r"../RECO_data"
     # print(os.listdir(path))
     # path = 'RECO_data'
@@ -26,10 +26,11 @@ def data_load1():
     x = pd.DataFrame()
     for name in  FileNames:
 
-        if re.search('data', name):
+        if re.search('RECO_Load', name):
             full_name = os.path.join(path, name)
             pd_load = pd.read_csv(full_name, encoding='utf-8')
-            pd_load_list = pd_load['2.169525401442797943e+02'].tolist()
+
+            pd_load_list = pd_load['mw'].tolist()
 
 
 
@@ -43,8 +44,8 @@ def data_load1():
                     pd_price[i] = float(pd_price[i].strip("$"))
                     pd_price[i] = pd_price[i]/1000*8
             for i in range(len(pd_price)):
-                # if pd_price[i]>70:
-                #     pd_price[i] = 70
+                if pd_price[i]>2:
+                    pd_price[i] = 2
                 pass
 
         elif re.search('Wea',name):
@@ -73,13 +74,13 @@ if __name__ == '__main__':
     # print(os.listdir('RECO_data'))
     pd_load,pd_price,pd_wea_wind,pd_wea_G_dir,pd_wea_G_diff,pd_wea_T ,pd_wea_G_hor= data_load1()
     # pd_price1 =price_reset(pd_price)
-    dist_price = list(range(len(pd_load)))
+    dist_price = list(range(len(pd_price)))
     print(max(pd_load))
 
-    # plt.plot(dist_price,pd_price1)
+    plt.plot(dist_price,pd_price)
 
     # plt.plot(dist_price,pd_load[:])
-    # plt.show()
+    plt.show()
     # #
     #
     #
