@@ -37,7 +37,7 @@ class PVSystem(object):
 
 if __name__ == '__main__':
     pd_load, pd_price, pd_wea_wind, pd_wea_G_dir, pd_wea_G_diff, pd_wea_T, pd_wea_G_hor = data_load1()
-    x = PVSystem(P_PV_rated=1500,pd_wea_T=pd_wea_T,pd_wea_G_dir=pd_wea_G_dir,pd_wea_G_diff=pd_wea_G_diff,pd_wea_G_hor=pd_wea_G_hor)
+    x = PVSystem(P_PV_rated=1439,pd_wea_T=pd_wea_T,pd_wea_G_dir=pd_wea_G_dir,pd_wea_G_diff=pd_wea_G_diff,pd_wea_G_hor=pd_wea_G_hor)
     c = 0
     a = []
 
@@ -46,6 +46,8 @@ if __name__ == '__main__':
 
         c += x.PVpower(i)
     diff_list =[]
+
+    print(c,'mal')
     for i in range(8760):
         diff = pd_load[i]  - a[i]
         diff_list.append(diff)

@@ -103,12 +103,12 @@ class HybridESS(object):
                         self.bt.StateOfCharge1(P_BT_ch=P_BT_ch, P_BT_dc=P_BT_dc)
                         self.bt.soc(i)
 
-                        energy_ = abs(energy[i]) - DC_DC_converter(max_discharge)
+                        energy_ = abs(energy[i]) - DC_DC_converter(max_discharge)*0.98
                         stoToenergy=max_discharge
 
                         SOC = self.ht.readSOC()[i]
                         if SOC > self.ht.SOC_Min()[i]:
-                            max_discharge = reverse_DC_DC_converter(min(self.ht.max_discharge()[i],self.fc_power[i]*0.6))
+                            max_discharge = DC_DC_converter(min(self.ht.max_discharge()[i],self.fc_power[i]*0.6))
                             if energy_ <= max_discharge:
                                 P_fc[i] = reverse_DC_DC_converter(energy_)
                                 self.ht.SOC(P_el=P_el,P_fc=P_fc)
@@ -118,13 +118,13 @@ class HybridESS(object):
                             else:
                                 P_fc[i] = max_discharge
                                 self.ht.SOC(P_el=P_el,P_fc=P_fc)
-                                self.GridToEnergy[i] = energy_ - DC_DC_converter(max_discharge)
+                                self.GridToEnergy[i] = reverse_DC_AC_converter(energy_ - DC_DC_converter(max_discharge)*0.6)
                                 self.storageToEnergy[i] = max_discharge+stoToenergy
                                 self.energyToStorage[i] = 0
 
                         else:
 
-                            self.GridToEnergy[i] = abs(energy[i]) -DC_DC_converter(stoToenergy)
+                            self.GridToEnergy[i] = reverse_DC_AC_converter(abs(energy[i]) -DC_DC_converter(stoToenergy))
                             self.energyToStorage[i] = 0
                             self.storageToEnergy[i] = stoToenergy
 
@@ -146,12 +146,12 @@ class HybridESS(object):
                                 P_fc[i] = max_discharge
                                 self.ht.SOC(P_el=P_el, P_fc=P_fc)
 
-                                self.GridToEnergy[i] = abs(energy[i]) - DC_DC_converter(max_discharge)
+                                self.GridToEnergy[i] = reverse_DC_AC_converter(abs(energy[i]) - DC_DC_converter(max_discharge)*0.6)
                                 self.storageToEnergy[i] = max_discharge
                                 self.energyToStorage[i] = 0
 
                         else:
-                            self.GridToEnergy[i] = abs(energy[i])
+                            self.GridToEnergy[i] = reverse_DC_AC_converter(abs(energy[i]))
                             self.energyToStorage[i] = 0
                             self.storageToEnergy[i] = 0
 

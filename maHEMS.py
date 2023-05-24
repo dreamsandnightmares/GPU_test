@@ -69,7 +69,7 @@ class HEMS(object):
 
                     if abs(energy[i]) <= DC_DC_converter(max_discharge):
 
-                        P_fc[i] = abs(reverse_DC_DC_converter(energy[i]))
+                        P_fc[i] = abs(reverse_DC_DC_converter(energy[i])/0.6)
                         self.ht.SOC(P_el=P_el,P_fc=P_fc)
                         self.GridToEnergy[i] = 0
                         self.storageToEnergy[i] = abs(energy[i])
@@ -78,14 +78,14 @@ class HEMS(object):
                         P_fc[i] = max_discharge
                         self.ht.SOC(P_el=P_el,P_fc=P_fc)
 
-                        self.GridToEnergy[i] =DC_AC_converter(abs(energy[i]) - DC_DC_converter(max_discharge))
+                        self.GridToEnergy[i] =reverse_DC_AC_converter(abs(energy[i]) - DC_DC_converter(max_discharge)*0.6)
                         self.storageToEnergy[i] =  max_discharge
                         self.energyToStorage[i] =  0
                 else:
                     P_fc = np.zeros([self.ht.len_])
                     P_el = np.zeros([self.ht.len_])
                     self.ht.SOC(P_el=P_el,P_fc=P_fc)
-                    self.GridToEnergy[i] =  DC_AC_converter(abs(energy[i]))
+                    self.GridToEnergy[i] =  reverse_DC_AC_converter(abs(energy[i]))
                     self.energyToStorage[i] = 0
                     self.storageToEnergy[i] = 0
 

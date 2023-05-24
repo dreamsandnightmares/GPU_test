@@ -1,5 +1,6 @@
 import math
 import time
+import os
 
 import numpy as np
 
@@ -286,9 +287,9 @@ def lcoe_hy(cost_pv, cost_bt,cost_EL,cost_fc,cost_ht,el_power,fc_power,ht_cap,bt
 
 def energy_management(project_lifetime:int,life_time:int,bt:np.array,pv_output:np.array,pd_load):
     res_output = pv_output
-    price_path = r'/home/WCH/Code/5.15_3/GPU_test/RECO_data/price.csv'
-    price = pd.read_csv(price_path)
-    price = price['price'].tolist()
+    # price_path = r'C:\Users\王晨浩\Desktop\GPU_test\RECO_data\price.csv'
+    # price = pd.read_csv(price_path)
+    # price = price['price'].tolist()
 
     ems  = BEMS(bt=bt)
     ems.initializa()
@@ -318,17 +319,18 @@ def energy_management(project_lifetime:int,life_time:int,bt:np.array,pv_output:n
             stoTopower += sto
             energyTosto += eTs
             energy_BESS.append(ele)
-            ele_cost += ele * price[i]
+            ele_cost += ele * grid_price(i)
             ele_all += pd_load[i]
             energy_sto.append(eTs)
             energy_sto_dis.append(sto)
+    print(ele_cost,'ele_cost')
     return gridTopower/project_lifetime,stoTopower/project_lifetime,energyTosto/project_lifetime,ele_cost,ele_all/project_lifetime
 
 def energy_management_ht(project_lifetime:int,life_time:int,ht:HT,el:np.array,fc:np.array,pv_output:np.array,pd_load):
     res_output = pv_output
-    price_path = r'/home/WCH/Code/5.15_3/GPU_test/RECO_data/price.csv'
-    price = pd.read_csv(price_path)
-    price = price['price'].tolist()
+    # price_path = r'C:\Users\王晨浩\Desktop\GPU_test\RECO_data\price.csv'
+    # price = pd.read_csv(price_path)
+    # price = price['price'].tolist()
 
 
     ems  = HEMS(ht=ht,el_power=el,fc_power=fc)
@@ -345,6 +347,9 @@ def energy_management_ht(project_lifetime:int,life_time:int,ht:HT,el:np.array,fc
     ele_all = 0
     energy_sto = []
     energy_sto_dis = []
+    sto_ = []
+    ets_=[]
+    elel = []
     for y in range(project_lifetime):
         for i in range(life_time):
             energy = res_output[i] - pd_load[i]
@@ -354,22 +359,28 @@ def energy_management_ht(project_lifetime:int,life_time:int,ht:HT,el:np.array,fc
             soc_.append(ht.readSOC())
             soc_BESS.append(ht.readSOC())
             ele, sto, eTs = ems.energyStorage(energy)
+            elel.append(ele[0])
+            sto_.append(sto[0])
+            ets_.append(eTs[0])
+
+            soc_.append(ht.readSOC())
             gridTopower += ele
             stoTopower += sto
             energyTosto += eTs
             energy_BESS.append(ele)
-            ele_cost += ele * price[i]
+            ele_cost += ele * grid_price(i)
             ele_all += pd_load[i]
             energy_sto.append(eTs)
             energy_sto_dis.append(sto)
+    print(sum(elel),'ele')
     return gridTopower/project_lifetime,stoTopower/project_lifetime,energyTosto/project_lifetime,ele_cost,ele_all/project_lifetime
 
 
 def energy_management_hybid(project_lifetime:int,life_time:int,bt:LionBattery,ht:HT,el:np.array,fc:np.array,pv_output:np.array,pd_load):
     res_output = pv_output
-    price_path  =r'/home/WCH/Code/5.15_3/GPU_test/RECO_data/price.csv'
-    price = pd.read_csv(price_path)
-    price = price['price'].tolist()
+    # price_path  =r'C:\Users\王晨浩\Desktop\GPU_test\RECO_data\price.csv'
+    # price = pd.read_csv(price_path)
+    # price = price['price'].tolist()
 
 
     ems  =HybridESS (bt=bt,ht=ht,el_power=el,fc_power=fc)
@@ -387,6 +398,8 @@ def energy_management_hybid(project_lifetime:int,life_time:int,bt:LionBattery,ht
     ele_all = 0
     energy_sto = []
     energy_sto_dis = []
+    sto_  =[]
+    ets_ =[]
     for y in range(project_lifetime):
         for i in range(life_time):
 
@@ -398,17 +411,24 @@ def energy_management_hybid(project_lifetime:int,life_time:int,bt:LionBattery,ht
             soc_.append(ht.readSOC())
             soc_BESS.append(ht.readSOC())
             ele, sto, eTs = ems.energyStorage(energy)
+            sto_.append(sto[0])
+            ets_.append(eTs[0])
+
+
             gridTopower += ele
             stoTopower += sto
             energyTosto += eTs
             energy_BESS.append(ele)
-            ele_cost += ele * price[i]
+            ele_cost += ele * grid_price(i)
             ele_all += pd_load[i]
             energy_sto.append(eTs)
             energy_sto_dis.append(sto)
     print(ht.LOH_t)
     a = bt.readSoc()
     print(a,'soc')
+    print(max(sto_),'最大发电')
+    print(sum(sto_))
+    print(sum(ets_))
     return gridTopower/project_lifetime,stoTopower/project_lifetime,energyTosto/project_lifetime,ele_cost,ele_all/project_lifetime
 
 def fitness_ht(in_,cost_pv,cost_el,cost_fc,cost_ht,project_lifetime,life_time):
@@ -439,12 +459,16 @@ def fitness_hy(in_,cost_bt,cost_pv,cost_el,cost_fc,cost_ht,project_lifetime,life
                                                                                 pv_output=pv_output,
                                                                                 pd_load=pd_load, el=el_power,
                                                                                 fc=fc_power)
+    print(ele_cost,'ele_cost')
 
     Lcoe = lcoe_hy(cost_pv=cost_pv, cost_EL=cost_el,cost_fc=cost_fc,cost_ht=cost_ht, el_power=el_power,
                    pv_cap=in_[:,0], project_time=project_lifetime,
                 energy=(ele_all), ele_cost=ele_cost,fc_power=fc_power,ht_cap  = in_[:,4],bt_cap=in_[:, 1],cost_bt=cost_bt)
     SSR = ssr(gridTopower, ele_all)
-    obj = np.array(list(zip(Lcoe,SSR)))
+    # obj = np.array(list(zip(Lcoe,SSR)))
+    obj =[]
+    obj.append(Lcoe[0])
+    obj.append(SSR[0])
 
     # obj =np.array([Lcoe,SSR])
     print(obj)
@@ -489,23 +513,28 @@ def fitness_bt(in_,cost_bt,cost_pv,project_lifetime,life_time):
 if __name__ == '__main__':
     print(time.time())
 
-
-    in_ =np.array([[1406,3195],[1832,3921]])
-    project_lifetime = 25
+    project_lifetime =25
     life_time = 8760
-    cost_pv = 4040
     cost_bt = 1625
+    cost_pv =4040
+    cost_el = 1600
+    cost_fc =4000
+    cost_ht = 200
+
+
+
+    in_ =np.array([[1135,1726],[1135,1726]])
+
     obj =fitness_bt(in_=in_,project_lifetime=project_lifetime,life_time=life_time,cost_bt=cost_bt,cost_pv=cost_pv)
 
-    in_ = np.array([[1406, 900,900,6000], [1406, 900,900,6000]])
-    cost_el =1600
-    cost_fc = 4000
-    cost_ht = 100
-    obj_2 = fitness_ht(in_=in_, project_lifetime=project_lifetime, life_time=life_time, cost_el=cost_bt,cost_fc= cost_fc,cost_pv=cost_pv,cost_ht=cost_ht)
 
-    in_ = np.array([[1185, 956, 373, 200,2846], [1406, 900, 900, 200,6000]])
-    obj_3 = fitness_hy(in_=in_, project_lifetime=project_lifetime, life_time=life_time, cost_el=cost_bt,
-                       cost_fc=cost_fc, cost_pv=cost_pv, cost_ht=cost_ht,cost_bt=cost_bt)
+    # in_ = np.array([[1439, 557,172,8182],[1651,599,305,6252] ])
+    # #
+    # obj_2 = fitness_ht(in_=in_, project_lifetime=project_lifetime, life_time=life_time, cost_el=cost_bt,cost_fc= cost_fc,cost_pv=cost_pv,cost_ht=cost_ht)
+
+    # in_ = np.array([[1315, 1050, 547, 100,9205], [1391, 1250, 511, 149,8350]])
+    # obj_3 = fitness_hy(in_=in_, project_lifetime=project_lifetime, life_time=life_time, cost_el=cost_bt,
+    #                    cost_fc=cost_fc, cost_pv=cost_pv, cost_ht=cost_ht,cost_bt=cost_bt)
 
     # pv, bt, pd_load, pd_price, pv_output, R_init = device_init(in_)
     # gridTopower, stoTopower, energyTosto, ele_cost, ele_all = energy_management(project_lifetime=project_lifetime,life_time=life_time,bt=bt,
@@ -524,3 +553,78 @@ if __name__ == '__main__':
     # print(gridTopower)
     # print(stoTopower)
     # print(energyTosto)
+    # path = r"C:\Users\王晨浩\Desktop\1.csv"
+    # pd = pd.read_csv(path)
+    # print(pd)
+    # PV = pd['列1.1'].tolist()
+    # bt = pd['列1.2'].tolist()
+    # el = pd['列1.3'].tolist()
+    # fc =pd['列1.4'].tolist()
+    # ht =pd['列1.5'].tolist()
+    # project_lifetime = 25
+    # life_time = 8760
+    # cost_pv = 4040
+    # cost_bt = 1462
+    # cost_el =1600
+    # cost_fc = 4000
+    # cost_ht = 200
+    # res =[]
+    # cost_bt_ = [1625*0.9,1625*0.8,1625*0.7,1625*0.6]
+    # cost_el_ =[1600*0.9,1600*0.8,1600*0.7,1600*0.6]
+    # cost_fc_ =[4000*0.9,4000*0.8,4000*0.7,4000*0.6]
+    #
+    # for j in cost_bt_:
+    #     res = []
+    #     list = [0, 23, 40, 53, 71, 84, 97, 111, 125, 136, 145, 151, 156, 159, 161, 168, 170, 172, 175, 179, 180]
+    #     for i in  list:
+    #         in_ = np.array([[PV[i],bt[i],el[i],fc[i],ht[i]]])
+    #         obj_3 = fitness_hy(in_=in_, project_lifetime=project_lifetime, life_time=life_time, cost_el=cost_el,
+    #                            cost_fc=cost_fc, cost_pv=cost_pv, cost_ht=cost_ht, cost_bt=j)
+    #         res.append(obj_3)
+    #     x ='bt{}'.format(j)
+    #
+    #     with open("test{}.txt".format(x), "w") as f:
+    #         pass
+    #     res = np.array(res)
+    #     print(res)
+    #     file_path = os.path.abspath("test{}.txt".format(x))
+    #     np.savetxt(file_path, res)
+    # res = []
+    # for j in cost_el_:
+    #     res = []
+    #     list = [0, 23, 40, 53, 71, 84, 97, 111, 125, 136, 145, 151, 156, 159, 161, 168, 170, 172, 175, 179, 180]
+    #     for i in list:
+    #         in_ = np.array([[PV[i], bt[i], el[i], fc[i], ht[i]]])
+    #         obj_3 = fitness_hy(in_=in_, project_lifetime=project_lifetime, life_time=life_time, cost_el=j,
+    #                            cost_fc=cost_fc, cost_pv=cost_pv, cost_ht=cost_ht, cost_bt=cost_bt)
+    #         res.append(obj_3)
+    #     x = 'el{}'.format(j)
+    #
+    #     with open("test{}.txt".format(x), "w") as f:
+    #         pass
+    #     res = np.array(res)
+    #     print(res)
+    #     file_path = os.path.abspath("test{}.txt".format(x))
+    #     np.savetxt(file_path, res)
+    # res = []
+    # for j in cost_fc_:
+    #     res = []
+    #     list = [0, 23, 40, 53, 71, 84, 97, 111, 125, 136, 145, 151, 156, 159, 161, 168, 170, 172, 175, 179, 180]
+    #     for i in list:
+    #         in_ = np.array([[PV[i], bt[i], el[i], fc[i], ht[i]]])
+    #         obj_3 = fitness_hy(in_=in_, project_lifetime=project_lifetime, life_time=life_time, cost_el=cost_el,
+    #                            cost_fc=j, cost_pv=cost_pv, cost_ht=cost_ht, cost_bt=cost_bt)
+    #         res.append(obj_3)
+    #     x = 'fc{}'.format(j)
+    #
+    #     with open("test{}.txt".format(x), "w") as f:
+    #         pass
+    #     res = np.array(res)
+    #     print(res)
+    #     file_path = os.path.abspath("test{}.txt".format(x))
+    #     np.savetxt(file_path, res)
+
+
+
+
+

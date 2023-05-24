@@ -11,7 +11,7 @@ from Mopso_res_bt import *
 def main():
 
     particals = 30 #粒子群的数量
-    cycle_ = 50 #迭代次数
+    cycle_ = 100 #迭代次数
     mesh_div = 10 #网格等分数量
     thresh = 300#外部存档阀值
     project_lifetime = 25
@@ -25,7 +25,7 @@ def main():
 
     # Population, Boundary, Coding = P_objective.P_objective("init", Problem, M, particals)
     # # print(Boundary)
-    Boundary = np.array([[3500.,8000.],[600.,600.]])
+    Boundary = np.array([[4500.,7000.],[100.,100.]])
     print(type(Boundary))
     ''
     # Boundary =
